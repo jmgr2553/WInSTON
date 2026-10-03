@@ -1,0 +1,9 @@
+beautifulsoup4
+curl_cffi
+openpyxl
+pandas
+pypdf
+python-dateutil
+requests
+sentence-transformers
+trafilatura

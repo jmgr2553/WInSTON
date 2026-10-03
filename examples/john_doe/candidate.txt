@@ -1,0 +1,13 @@
+Name: John Doe (Dr)
+Current position: Teaching Fellow in Modern History, University of Northbridge, since October 2025 (fixed-term, ends August 2027).
+PhD status: PhD in History awarded by the University of Northbridge in January 2025 (thesis submitted September 2024).
+Earliest start date for a new post: September 2026.
+Nationality / right to work: UK citizen; no right to work in the EU without a visa.
+Previous degrees: MA in Modern History, University of Northbridge (2020, distinction); BA (Hons) in History, Eastbury University (2019, first class).
+Thesis: "Strikes, Soup Kitchens and Solidarity: Working-Class Women and the Politics of Relief in Industrial Britain, 1880-1926".
+Fields: modern British and European social history; labour history; women's and gender history; history of welfare and charity; migration between Britain and Ireland; oral history; digital archives.
+Methods: archival research in trade-union, local-government and newspaper collections; oral history interviews; quantitative analysis of poor-law and relief records; GIS mapping; basic Python and R.
+Languages: English (native), French (C1), German (B1 reading).
+Publications: one monograph proposal under review; two peer-reviewed articles (Journal of Social History Studies, 2024; Labour and Society Review, 2025); one book chapter (2025).
+Teaching: seminars and lectures on modern Britain and Europe since 1800; module convenor for "Protest and Reform, 1815-1914".
+Not a fit: laboratory sciences, medicine, engineering; PhD studentships; administrative posts.

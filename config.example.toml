@@ -1,0 +1,218 @@
+# =============================================================================
+# jobHunter settings - EXAMPLE
+# =============================================================================
+# This example is set up for Dr John Doe, a (fictional) modern historian whose
+# files are in examples/john_doe/. To make it yours:
+#
+#   1. cp config.example.toml config.toml
+#   2. cp -r examples/john_doe my_data      (then edit the files in my_data/)
+#   3. In config.toml, point [files] at my_data/ and change the rest below.
+#
+# config.toml and my_data/ are listed in .gitignore, so they stay private.
+# Relative file names are read from the folder that holds this file.
+# Lines starting with # are comments. Regular expressions (patterns) are
+# written between 'single quotes' so that backslashes need no escaping.
+
+# ---- Your files --------------------------------------------------------------
+[files]
+cv = "examples/john_doe/cv.pdf"                 # a .pdf or a plain .txt file
+profile = "examples/john_doe/profile.txt"       # the posts you want (~100-300 words)
+candidate = "examples/john_doe/candidate.txt"   # facts the model uses to judge eligibility
+# Optional: posts you do NOT want. Ads that resemble it lose points.
+# Leave out (or "") to switch off.
+not_interested = "examples/john_doe/not_interested.txt"
+cache = "jobs_cache.json"            # everything downloaded so far
+output = "postdoc_matches.xlsx"      # the results spreadsheet
+
+# ---- Your PhD timeline -------------------------------------------------------
+# The script (not the model) compares these with the dates in each ad's PhD
+# rule. Write dates without quotes. If your PhD is still in progress, use
+# realistic dates ("latest likely", not "best case"). Keep them consistent
+# with your candidate file.
+[timeline]
+thesis_submission = 2024-09-30   # thesis submitted for examination
+phd_award = 2025-01-31           # viva passed and degree awarded
+
+# ---- Step 3: the language model on your computer -----------------------------
+# provider = "ollama": the Ollama app (https://ollama.com). Download a model
+#   first, e.g.  ollama pull qwen3.5:4b
+# provider = "openai": any local server with an OpenAI-style API - LM Studio,
+#   llama.cpp's llama-server, vLLM, Jan, LocalAI. Set base_url to the server's
+#   address, ending in /v1, and model to the name the server gives the model.
+# Larger models judge better but read more slowly; 4B-8B models work on a
+# laptop with 16 GB of memory.
+[llm]
+provider = "ollama"
+base_url = "http://localhost:11434"
+model = "qwen3.5:4b"
+context = 8192      # reading window in tokens (Ollama only; other servers set it themselves)
+top_n = 40          # how many of the best step-2 ads the model reads
+text_chars = 6000   # how much of each ad the model reads (~1,000 words)
+# api_key = ""      # only if your server asks for one
+
+# Other examples:
+#
+# LM Studio (start its server from the Developer tab):
+#   provider = "openai"
+#   base_url = "http://localhost:1234/v1"
+#   model = "qwen3-8b"
+#
+# llama.cpp (llama-server -m model.gguf --port 8080):
+#   provider = "openai"
+#   base_url = "http://localhost:8080/v1"
+#   model = "any"
+
+# ---- How the model scores field fit ------------------------------------------
+# The model rates each post 0-10. Describing your fields here, in a few words
+# each, makes the rating much more accurate than the general wording used
+# when they are left out.
+[fit_scale]
+own_field = "modern British or European social history, labour history, the history of welfare and poor relief"
+close_fields = "nineteenth- and twentieth-century history in general, gender history, migration history, oral or digital history"
+neighbouring_fields = "economic history, historical sociology, Irish studies, history of political thought"
+
+# ---- Step 2: ranking with embeddings -----------------------------------------
+[ranking]
+# "base" (~1 GB) runs fine on a laptop. Other e5 models also work.
+embedding_model = "intfloat/multilingual-e5-base"
+profile_weight = 0.6    # how much the profile counts versus the CV (0-1)
+negative_weight = 0.5   # how strongly "not interested" pushes ads down (0 = not at all)
+
+# ---- Downloading -------------------------------------------------------------
+[network]
+seconds_between_downloads = 3   # be polite to the websites
+# Sites whose security certificate can't be checked (incomplete certificate
+# chain). The check is skipped for these hosts only.
+skip_cert_check = []
+
+# ---- Which titles count as postdocs ------------------------------------------
+# A title is kept if it matches any "include" pattern and no "exclude" one.
+# Patterns are regular expressions; case is ignored. \b marks a word edge.
+[titles]
+include = [
+    'post[- ]?doc', 'post[- ]?doctoral', '\bfellow', 'junior research',
+    'research associate', 'early career', '\bJRF\b',
+    # Spanish
+    '\binvestigador', 'juan de la cierva', 'ram[oó]n y cajal', 'atracci[oó]n de talento',
+    'beatriu de pin[oó]s', 'mar[ií]a zambrano', 'margarita salas',
+    # German: Postdoktorand/in, "Wissenschaftliche/r Mitarbeiter/in"
+    # (often a postdoc, sometimes a PhD post - the model sorts that out),
+    # Nachwuchsgruppe (junior research group).
+    'postdok', 'wiss(?:enschaftliche\S*|\.)\s*mitarbeiter', 'nachwuchsgruppe',
+]
+exclude = [
+    # PhD posts ("Postdoctoral" is not affected) and events.
+    '\bph\.?d\b', '\bpre-?doctoral\b', '\bcontrat doctoral\b',
+    '\bdoctoral (?:network|candidate|student|position|programme|program)',
+    '\bstudentships?\b', '\bdoktorand',
+    '\bworkshop\b', '\bsummer school\b', '\bconference\b',
+    # Spanish PhD contracts and technician posts
+    '\btesis doctoral\b', '\bFP[IU]\b', '\bPIF\d*\b', '\bJAE[ -]?Intro\b', '\bt[eé]cnic[oa]s?\b',
+    # German PhD posts and student assistants
+    '\bpromotion', '\bstudentische', '\bhilfskr[aä]ft', '\bformaci[oó]n investigadora\b',
+]
+
+# ---- Funders' rules ----------------------------------------------------------
+# Some ads leave out the funder's own eligibility rule. The note is shown to
+# the model for every ad whose title matches the pattern. UPDATE EACH YEAR.
+[[scheme_notes]]
+pattern = 'leverhulme early career'
+note = "Leverhulme Trust rule for the 2027 round: applicants who are or have been registered for a doctorate must have submitted their doctoral thesis for viva voce examination by 4pm on 18 February 2027."
+
+# =============================================================================
+# SOURCES
+# =============================================================================
+# Check new sources with:  python hunter.py --check-sources
+# Any source can be switched off with  enabled = false.
+
+# ---- Search sites ------------------------------------------------------------
+# Sites with a keyword search. "url" is the search address, with {query}
+# where the keywords go and {page} where the page number goes.
+#   first_page, page_step: how the site numbers its pages - jobs.ac.uk counts
+#       results (1, 26, 51...), EURAXESS counts pages (0, 1, 2...).
+#   per_page: results per page; max_pages: how many pages to read per query.
+#   link_pattern: what an individual ad's address looks like on that site.
+#   title_filter: keep only results whose title matches [titles] include.
+#   queries: the keyword searches to run.
+# Optional:
+#   encode = "percent": spaces written as %20 (default: +).
+#   download_ads = false: don't open each ad; rank the result card alone (the
+#       full ad is then fetched in step 3, only for the ads the model reads).
+#   delay: seconds between result pages.
+#   results_count_re + max_results: if the page reports more results than
+#       max_results, the site ignored the keyword and the search is skipped.
+#   search_urls: searches built in your browser with the site's own filters;
+#       paste the address bar here.
+
+[[search_sites]]
+name = "jobs.ac.uk"
+url = "https://www.jobs.ac.uk/search/?keywords={query}&location=&pageSize=25&sortOrder=0&startIndex={page}"
+first_page = 1
+page_step = 25
+per_page = 25
+max_pages = 3
+link_pattern = 'https?://[^/]+/job/[A-Za-z0-9]+/[^/?#]*'
+title_filter = true
+queries = [
+    "history", '"modern history"', '"social history"', '"labour history"',
+    '"economic history"', '"research fellowship"', '"junior research fellowship"',
+    "Leverhulme",
+]
+
+[[search_sites]]
+# EURAXESS, the European Commission's research jobs portal. It limits how
+# fast it can be read, hence download_ads = false and the longer delay.
+# Titles there vary a lot ("Researcher in...", "Contrato...") so the title
+# filter is off.
+name = "EURAXESS"
+url = "https://euraxess.ec.europa.eu/jobs/search?f%5B0%5D=offer_type%3Ajob_offer&f%5B1%5D=keywords%3A{query}&page={page}"
+encode = "percent"
+first_page = 0
+page_step = 1
+per_page = 10
+max_pages = 3
+download_ads = false
+delay = 10
+results_count_re = 'Search results \((\d[\d,]*)\)'
+max_results = 2000
+link_pattern = 'https://euraxess\.ec\.europa\.eu/jobs/\d+'
+title_filter = false
+queries = ["modern history", "social history", "labour history", "contemporary history"]
+search_urls = []
+
+# ---- Listing pages -----------------------------------------------------------
+# A single page that lists current vacancies as links. The script keeps
+# every link whose text matches [titles].
+#   link_pattern (optional): what ad addresses look like on that page. Only
+#       those links count (menus are skipped), and links whose text is too
+#       short ("Read more") get a title rebuilt from the address.
+#   always_read = true: the model reads every ad from this page, whatever its
+#       step-2 rank. Useful for "any subject" fellowships (e.g. college JRFs),
+#       which never resemble your profile closely and so rank low.
+# Pages that draw their list with JavaScript can't be read by this script;
+# --check-sources warns about them.
+
+[[listing_pages]]
+name = "Cambridge colleges"
+url = "https://www.jobs.cam.ac.uk/college/"
+always_read = true
+
+[[listing_pages]]
+name = "Oxford Gazette"
+url = "https://www.ox.ac.uk/about/how-we-are-run/gazette/jobs"
+always_read = true
+
+[[listing_pages]]
+# H-Net Job Guide: the main humanities job board in North America.
+name = "H-Net Job Guide"
+url = "https://www.h-net.org/jobs/job_browse.php"
+link_pattern = 'job_display\.php\?id=\d+|/jobs?/\d+'
+always_read = true
+
+[[listing_pages]]
+# Forum Transregionale Studien, Berlin. Its links often read just "more",
+# so link_pattern is what finds them.
+name = "Forum Transregionale Studien"
+url = "https://www.forum-transregionale-studien.de/en/news/call-for-applications"
+link_pattern = '/call-for-applications/details/[^/?#]+'
+enabled = false
