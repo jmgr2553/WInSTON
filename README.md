@@ -1,4 +1,4 @@
-# jobHunter
+# WINSTON: Work Information Search Tool for Obscure topics & Niches 🎩
 
 Finds postdoctoral and early-career research posts that suit **you**, and tells you whether you are eligible for them.
 
