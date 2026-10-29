@@ -1,4 +1,4 @@
-# WINSTON 🎩
+# WInSTON 🎩
 
 **Work Information Search Tool for Obscure topics & Niches**
 
